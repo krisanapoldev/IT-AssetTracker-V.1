@@ -357,12 +357,14 @@ const App: React.FC = () => {
         const data = JSON.parse(text);
         
         await db.restoreBackup(data);
-        showNotification(t('importSuccess'));
         
-        // Reload data after delay
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+        // Refresh State directly instead of Reloading Page
+        const [newAssets, newHistory] = await Promise.all([db.getAssets(), db.getHistory()]);
+        setAssets(newAssets);
+        setHistoryLogs(newHistory);
+        handleConfigUpdate(); // Restore AutoSync settings if they were in the backup
+        
+        showNotification(t('importSuccess'));
 
       } catch (error) {
         console.error("Import failed:", error);
@@ -497,7 +499,7 @@ const App: React.FC = () => {
             type="file" 
             ref={fileInputRef} 
             onChange={handleFileChange} 
-            accept=".json" 
+            accept=".json,.xlsx" 
             className="hidden" 
           />
         </nav>
@@ -534,7 +536,7 @@ const App: React.FC = () => {
           </div>
           <div className="flex justify-between text-xs text-slate-400">
             <span>{t('online')}</span>
-            <span>v2.3.1</span>
+            <span>v2.3.2</span>
           </div>
         </div>
       </aside>
